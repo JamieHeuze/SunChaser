@@ -17,6 +17,13 @@ export function CompassPage() {
   const azimuth = sunPosition?.azimuthDeg ?? 180
   const altitude = sunPosition?.altitudeDeg ?? 0
 
+  // The rose is CSS-rotated by `rotation` (-heading) so that physical north stays
+  // visually "up". The needle is drawn in screen space, so its SVG angle must be
+  // shifted by the same amount to remain anchored to the same physical direction.
+  // Without this, the needle drifts by the device heading and reads ~180° wrong
+  // when the device faces south.
+  const needleAzimuth = heading !== null ? ((azimuth - heading) % 360 + 360) % 360 : azimuth
+
   const showEnableButton = permissionState === 'prompt' || (isSupported && heading === null && permissionState !== 'unavailable' && permissionState !== 'denied')
 
   return (
@@ -44,7 +51,7 @@ export function CompassPage() {
       {/* Compass */}
       <div className="relative w-full max-w-[320px] aspect-square my-4">
         <CompassRose rotation={rotation} />
-        <CompassNeedle azimuthDeg={azimuth} altitudeDeg={altitude} />
+        <CompassNeedle azimuthDeg={needleAzimuth} altitudeDeg={altitude} />
       </div>
 
       {/* Status / permission */}
