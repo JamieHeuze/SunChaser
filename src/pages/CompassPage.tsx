@@ -10,17 +10,19 @@ export function CompassPage() {
   useDeviceOrientation()
 
   const sunPosition = useAppStore((s) => s.sunPosition)
-  const { heading, permissionState } = useAppStore((s) => s.deviceOrientation)
+  const { heading, permissionState, isSupported } = useAppStore((s) => s.deviceOrientation)
   const setDeviceOrientation = useAppStore((s) => s.setDeviceOrientation)
 
   const rotation = heading !== null ? -heading : 0
   const azimuth = sunPosition?.azimuthDeg ?? 180
   const altitude = sunPosition?.altitudeDeg ?? 0
 
+  const showEnableButton = permissionState === 'prompt' || (isSupported && heading === null && permissionState !== 'unavailable' && permissionState !== 'denied')
+
   return (
     <div className="flex flex-col items-center justify-between h-full px-4 pt-4 pb-2 max-w-lg mx-auto">
       {/* Info row */}
-      <div className="flex gap-4 w-full justify-center">
+      <div className="flex gap-4 w-full justify-center flex-wrap">
         <div className="bg-slate-800/80 rounded-xl px-4 py-2 text-center border border-slate-700/50">
           <div className="text-xs text-slate-400">Direction</div>
           <div className="text-sm font-bold text-orange-400">{formatBearing(azimuth)}</div>
@@ -45,28 +47,44 @@ export function CompassPage() {
         <CompassNeedle azimuthDeg={azimuth} altitudeDeg={altitude} />
       </div>
 
-      {/* Permission prompt */}
-      {permissionState === 'prompt' && (
-        <button
-          onClick={() => requestOrientationPermission(setDeviceOrientation)}
-          className="w-full max-w-sm bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-2xl transition-colors text-sm"
-        >
-          Enable Live Compass
-        </button>
+      {/* Status / permission */}
+      {showEnableButton && (
+        <div className="w-full max-w-sm space-y-2">
+          <button
+            onClick={() => requestOrientationPermission(setDeviceOrientation)}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-2xl transition-colors text-sm"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            Enable Live Compass
+          </button>
+          <p className="text-slate-500 text-xs text-center">
+            Tap to allow device orientation access
+          </p>
+        </div>
       )}
+
       {permissionState === 'denied' && (
+        <div className="w-full max-w-sm text-center space-y-1">
+          <p className="text-red-400 text-sm font-medium">Compass access denied</p>
+          <p className="text-slate-400 text-xs">
+            Go to your browser settings and allow motion &amp; orientation access for this site.
+          </p>
+        </div>
+      )}
+
+      {permissionState === 'unavailable' && (
         <p className="text-slate-400 text-xs text-center max-w-xs">
-          Live compass unavailable — showing calculated sun direction. Enable device orientation in your browser settings.
+          No compass sensor detected — showing calculated sun direction only.
         </p>
       )}
+
       {heading !== null && (
         <p className="text-slate-500 text-xs text-center">
           Compass rose rotates with your device · Sun needle points toward the sun
-        </p>
-      )}
-      {heading === null && permissionState === 'granted' && (
-        <p className="text-slate-500 text-xs text-center">
-          Calculated sun direction · No live compass signal
         </p>
       )}
     </div>
