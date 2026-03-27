@@ -29,9 +29,13 @@ function extractHeading(event: DeviceOrientationEvent): number | null {
 
 export function useDeviceOrientation() {
   const setDeviceOrientation = useAppStore((s) => s.setDeviceOrientation)
+  const permissionState = useAppStore((s) => s.deviceOrientation.permissionState)
   const listenersAdded = useRef(false)
 
   useEffect(() => {
+    // Already active — listeners are running, don't disturb them
+    if (permissionState === 'granted' || permissionState === 'unavailable') return
+
     if (!window.DeviceOrientationEvent) {
       setDeviceOrientation({ isSupported: false, permissionState: 'unavailable' })
       return
@@ -46,7 +50,7 @@ export function useDeviceOrientation() {
 
     // Non-iOS: add listeners and wait for a real event before setting 'granted'
     addOrientationListeners(setDeviceOrientation, listenersAdded)
-  }, [setDeviceOrientation])
+  }, [permissionState, setDeviceOrientation])
 }
 
 function addOrientationListeners(

@@ -61,8 +61,8 @@ function computeHillshade(
   const ly = Math.cos(azRad) * Math.cos(altRad)
   const lz = Math.sin(altRad)
 
-  // Shadow strength: stronger at low sun angles (more dramatic at golden hour)
-  const shadowStrength = Math.max(0.3, 1 - altDeg / 90)
+  // Shadow intensity scales with sun altitude: long dramatic shadows at golden hour
+  const shadowStrength = Math.max(0.35, 1 - altDeg / 85)
 
   for (let r = 1; r < h - 1; r++) {
     for (let c = 1; c < w - 1; c++) {
@@ -78,20 +78,22 @@ function computeHillshade(
 
       const i = (r * w + c) * 4
 
-      if (shade < 0.05) {
-        // In shadow — cool blue-indigo tint
-        const a = Math.round(Math.min(190, (-shade + 0.05) * 280 * shadowStrength))
-        out.data[i]     = 20
-        out.data[i + 1] = 25
-        out.data[i + 2] = 70
-        out.data[i + 3] = a
+      // On a dark basemap we paint *light onto dark* rather than shadow onto light.
+      // Sunlit faces → warm amber glow; shadowed faces → cool deep-navy darkening.
+      if (shade <= 0) {
+        // Shadow: deep navy — darkens the already-dark base further
+        const t = Math.min(1, -shade * 1.4) * shadowStrength
+        out.data[i]     = 8
+        out.data[i + 1] = 12
+        out.data[i + 2] = 55
+        out.data[i + 3] = Math.round(t * 170)
       } else {
-        // In sunlight — subtle warm golden tint at low angles, transparent at high angles
-        const warmth = Math.max(0, (0.6 - shade) * shadowStrength * 25)
+        // Sunlit: warm amber glow that "lights up" the dark base
+        const t = Math.min(1, shade * 1.2)
         out.data[i]     = 255
-        out.data[i + 1] = 210
-        out.data[i + 2] = 100
-        out.data[i + 3] = Math.round(warmth)
+        out.data[i + 1] = 175
+        out.data[i + 2] = 45
+        out.data[i + 3] = Math.round(t * 115 * shadowStrength)
       }
     }
   }
@@ -115,7 +117,7 @@ class HillshadeGridLayer extends L.GridLayer {
     super({ ...opts, opacity: 1, tileSize: 256 })
     this.sunAzimuthDeg = opts.sunAzimuthDeg
     this.sunAltitudeDeg = opts.sunAltitudeDeg
-    this.zScale = opts.zScale ?? 2
+    this.zScale = opts.zScale ?? 3
   }
 
   setSunPosition(azimuth: number, altitude: number) {
