@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sun-orange: #f97316;
+  --color-sun-gold: #fbbf24;
+  --color-night-dark: #0f172a;
+  --color-horizon-blue: #0ea5e9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #0f172a;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Prevent iOS bounce/overscroll on the app shell */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* Leaflet z-index fix */
+.leaflet-container {
+  background: #1e293b;
+  z-index: 0;
+}
