@@ -1,69 +1,91 @@
 interface Props {
-  rotation: number // degrees — negative of device heading
+  rotation: number
 }
 
-const CARDINALS = [
-  { label: 'N', angle: 0, major: true },
-  { label: 'NE', angle: 45, major: false },
-  { label: 'E', angle: 90, major: true },
-  { label: 'SE', angle: 135, major: false },
-  { label: 'S', angle: 180, major: true },
-  { label: 'SW', angle: 225, major: false },
-  { label: 'W', angle: 270, major: true },
-  { label: 'NW', angle: 315, major: false },
-]
-
 export function CompassRose({ rotation }: Props) {
-  const cx = 150
-  const cy = 150
-  const r = 130
+  const cx = 150, cy = 150, r = 128
+
+  // Tick marks: every 10°, longer every 30°, even longer at cardinals
+  const ticks = Array.from({ length: 36 }, (_, i) => {
+    const deg = i * 10
+    const rad = ((deg - 90) * Math.PI) / 180
+    const isCardinal = deg % 90 === 0
+    const isMajor = deg % 30 === 0
+    const inner = isCardinal ? r - 18 : isMajor ? r - 12 : r - 7
+    return { deg, rad, inner, isCardinal, isMajor }
+  })
+
+  const cardinals = [
+    { label: 'N', angle: 0, color: '#ff6600' },
+    { label: 'E', angle: 90, color: '#686868' },
+    { label: 'S', angle: 180, color: '#686868' },
+    { label: 'W', angle: 270, color: '#686868' },
+  ]
+
+  const subCardinals = [
+    { label: 'NE', angle: 45 }, { label: 'SE', angle: 135 },
+    { label: 'SW', angle: 225 }, { label: 'NW', angle: 315 },
+  ]
 
   return (
     <svg
       viewBox="0 0 300 300"
       className="w-full h-full"
-      style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.15s linear' }}
+      style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 0.12s linear' }}
     >
       {/* Outer ring */}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1e293b" strokeWidth={2} />
-      <circle cx={cx} cy={cy} r={r - 10} fill="none" stroke="#0f172a" strokeWidth={1} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#222222" strokeWidth={1} />
 
-      {/* Degree ticks */}
-      {Array.from({ length: 36 }, (_, i) => {
-        const deg = i * 10
-        const rad = ((deg - 90) * Math.PI) / 180
-        const inner = r - 8
-        const outer = r - 2
-        return (
-          <line
-            key={deg}
-            x1={cx + inner * Math.cos(rad)}
-            y1={cy + inner * Math.sin(rad)}
-            x2={cx + outer * Math.cos(rad)}
-            y2={cy + outer * Math.sin(rad)}
-            stroke="#334155"
-            strokeWidth={1}
-          />
-        )
-      })}
+      {/* Tick marks */}
+      {ticks.map(({ deg, rad, inner, isCardinal, isMajor }) => (
+        <line
+          key={deg}
+          x1={cx + inner * Math.cos(rad)}
+          y1={cy + inner * Math.sin(rad)}
+          x2={cx + r * Math.cos(rad)}
+          y2={cy + r * Math.sin(rad)}
+          stroke={isCardinal ? '#444444' : isMajor ? '#2e2e2e' : '#222222'}
+          strokeWidth={isCardinal ? 1.5 : 1}
+        />
+      ))}
 
-      {/* Cardinal / intercardinal labels */}
-      {CARDINALS.map(({ label, angle, major }) => {
+      {/* Sub-cardinal labels */}
+      {subCardinals.map(({ label, angle }) => {
         const rad = ((angle - 90) * Math.PI) / 180
-        const labelR = r - 22
-        const x = cx + labelR * Math.cos(rad)
-        const y = cy + labelR * Math.sin(rad)
-        const isNorth = label === 'N'
+        const lr = r - 26
         return (
           <text
             key={label}
-            x={x}
-            y={y}
+            x={cx + lr * Math.cos(rad)}
+            y={cy + lr * Math.sin(rad)}
             textAnchor="middle"
             dominantBaseline="central"
-            fontSize={major ? 13 : 9}
-            fontWeight={major ? 'bold' : 'normal'}
-            fill={isNorth ? '#ef4444' : major ? '#e2e8f0' : '#64748b'}
+            fontSize={8}
+            fontFamily="'IBM Plex Mono', monospace"
+            fill="#363636"
+            letterSpacing="0.1em"
+          >
+            {label}
+          </text>
+        )
+      })}
+
+      {/* Cardinal labels */}
+      {cardinals.map(({ label, angle, color }) => {
+        const rad = ((angle - 90) * Math.PI) / 180
+        const lr = r - 30
+        return (
+          <text
+            key={label}
+            x={cx + lr * Math.cos(rad)}
+            y={cy + lr * Math.sin(rad)}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={13}
+            fontWeight="600"
+            fontFamily="'IBM Plex Mono', monospace"
+            fill={color}
+            letterSpacing="0.05em"
           >
             {label}
           </text>
@@ -71,7 +93,7 @@ export function CompassRose({ rotation }: Props) {
       })}
 
       {/* Center dot */}
-      <circle cx={cx} cy={cy} r={4} fill="#334155" />
+      <circle cx={cx} cy={cy} r={3} fill="#363636" />
     </svg>
   )
 }

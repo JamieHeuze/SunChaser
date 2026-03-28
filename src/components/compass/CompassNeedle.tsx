@@ -4,71 +4,77 @@ interface Props {
 }
 
 export function CompassNeedle({ azimuthDeg, altitudeDeg }: Props) {
-  const cx = 150
-  const cy = 150
+  const cx = 150, cy = 150
   const isAbove = altitudeDeg > 0
   const rad = ((azimuthDeg - 90) * Math.PI) / 180
-  const needleLen = 90
-  const tipX = cx + needleLen * Math.cos(rad)
-  const tipY = cy + needleLen * Math.sin(rad)
-  const labelR = needleLen + 18
-  const labelX = cx + labelR * Math.cos(rad)
-  const labelY = cy + labelR * Math.sin(rad)
+  const tipLen = 92
+  const tailLen = 20
+
+  const tipX = cx + tipLen * Math.cos(rad)
+  const tipY = cy + tipLen * Math.sin(rad)
+  const tailX = cx - tailLen * Math.cos(rad)
+  const tailY = cy - tailLen * Math.sin(rad)
+
+  // Arrowhead points — small equilateral triangle at the tip
+  const perpRad = rad + Math.PI / 2
+  const arrowSize = 5
+  const ax1 = tipX + arrowSize * Math.cos(perpRad)
+  const ay1 = tipY + arrowSize * Math.sin(perpRad)
+  const ax2 = tipX - arrowSize * Math.cos(perpRad)
+  const ay2 = tipY - arrowSize * Math.sin(perpRad)
+  const ax3 = tipX + arrowSize * 1.6 * Math.cos(rad)
+  const ay3 = tipY + arrowSize * 1.6 * Math.sin(rad)
+
+  const color = isAbove ? '#ff6600' : '#363636'
+  const labelR = tipLen + 20
+  const lx = cx + labelR * Math.cos(rad)
+  const ly = cy + labelR * Math.sin(rad)
 
   return (
     <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full pointer-events-none">
-      {/* Glow */}
+      {/* Subtle glow behind needle when sun is up */}
       {isAbove && (
-        <circle cx={tipX} cy={tipY} r={14} fill="#f97316" opacity={0.2} />
+        <line
+          x1={tailX} y1={tailY} x2={tipX} y2={tipY}
+          stroke="#ff6600" strokeWidth={8} strokeLinecap="round" opacity={0.06}
+        />
       )}
-      {/* Needle line */}
+
+      {/* Tail (short, dim) */}
       <line
-        x1={cx}
-        y1={cy}
-        x2={tipX}
-        y2={tipY}
-        stroke={isAbove ? '#f97316' : '#475569'}
-        strokeWidth={isAbove ? 3 : 2}
-        strokeDasharray={isAbove ? undefined : '6 4'}
-        strokeLinecap="round"
+        x1={cx} y1={cy} x2={tailX} y2={tailY}
+        stroke={isAbove ? '#ff660040' : '#2a2a2a'} strokeWidth={1} strokeLinecap="round"
       />
-      {/* Sun circle at tip */}
-      <circle
-        cx={tipX}
-        cy={tipY}
-        r={7}
-        fill={isAbove ? '#fbbf24' : '#475569'}
-        stroke={isAbove ? '#f97316' : '#334155'}
-        strokeWidth={2}
+
+      {/* Main needle line */}
+      <line
+        x1={cx} y1={cy} x2={tipX} y2={tipY}
+        stroke={color} strokeWidth={1.5} strokeLinecap="round"
+        strokeDasharray={isAbove ? undefined : '4 3'}
       />
-      {/* Sun rays (only when above horizon) */}
-      {isAbove && [0, 60, 120, 180, 240, 300].map((deg) => {
-        const rr = ((deg - 90) * Math.PI) / 180
-        return (
-          <line
-            key={deg}
-            x1={tipX + 9 * Math.cos(rr)}
-            y1={tipY + 9 * Math.sin(rr)}
-            x2={tipX + 13 * Math.cos(rr)}
-            y2={tipY + 13 * Math.sin(rr)}
-            stroke="#fbbf24"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-          />
-        )
-      })}
+
+      {/* Arrowhead */}
+      <polygon
+        points={`${ax1},${ay1} ${ax2},${ay2} ${ax3},${ay3}`}
+        fill={color}
+      />
+
       {/* Label */}
       <text
-        x={labelX}
-        y={labelY}
+        x={lx} y={ly}
         textAnchor="middle"
         dominantBaseline="central"
-        fontSize={10}
-        fontWeight="bold"
-        fill={isAbove ? '#fbbf24' : '#64748b'}
+        fontSize={9}
+        fontFamily="'IBM Plex Mono', monospace"
+        fontWeight="500"
+        letterSpacing="0.1em"
+        fill={isAbove ? '#ff6600' : '#363636'}
       >
-        {isAbove ? `☀ ${Math.round(azimuthDeg)}°` : `☽ ${Math.round(azimuthDeg)}°`}
+        {isAbove ? `${Math.round((azimuthDeg + 360) % 360)}°` : 'BELOW'}
       </text>
+
+      {/* Center ring */}
+      <circle cx={cx} cy={cy} r={5} fill="#111111" stroke={color} strokeWidth={1.5} />
     </svg>
   )
 }

@@ -1,33 +1,44 @@
 import { useAppStore } from '@/store/appStore'
-import { formatBearing, formatAltitude } from '@/utils/formatUtils'
+import { formatCardinal } from '@/utils/formatUtils'
 import { AltitudeArc } from './AltitudeArc'
 
 export function SunInfoCard() {
   const sunPosition = useAppStore((s) => s.sunPosition)
 
-  if (!sunPosition) {
-    return (
-      <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50">
-        <p className="text-slate-400 text-sm text-center">Calculating sun position…</p>
-      </div>
-    )
-  }
-
-  const { azimuthDeg, altitudeDeg, isAboveHorizon } = sunPosition
+  const azimuth = sunPosition?.azimuthDeg ?? 0
+  const altitude = sunPosition?.altitudeDeg ?? 0
+  const isAbove = sunPosition?.isAboveHorizon ?? false
 
   return (
-    <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Sun Direction</p>
-          <p className="text-3xl font-bold text-white">{formatBearing(azimuthDeg)}</p>
-          <p className={`text-sm mt-1 font-medium ${isAboveHorizon ? 'text-orange-400' : 'text-slate-400'}`}>
-            {isAboveHorizon ? `${formatAltitude(altitudeDeg)} above horizon` : 'Below horizon'}
-          </p>
+    <div className="border-b border-te-border">
+      {/* Main readout row */}
+      <div className="grid grid-cols-2 divide-x divide-te-border">
+        {/* Azimuth */}
+        <div className="px-4 py-4">
+          <div className="te-label mb-2">AZIMUTH</div>
+          <div className="flex items-baseline gap-2">
+            <span className="te-value-xl te-value-accent">
+              {String(Math.round(azimuth)).padStart(3, '0')}°
+            </span>
+            <span className="te-label text-te-muted">{formatCardinal(azimuth)}</span>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <AltitudeArc altitudeDeg={altitudeDeg} />
+
+        {/* Altitude */}
+        <div className="px-4 py-4">
+          <div className="te-label mb-2">ALTITUDE</div>
+          <div className="flex items-baseline gap-2">
+            <span className={`te-value-xl ${isAbove ? 'text-te-text' : 'text-te-dim'}`}>
+              {altitude >= 0 ? '' : '−'}{String(Math.abs(Math.round(altitude))).padStart(2, '0')}°
+            </span>
+            <span className="te-label">{isAbove ? 'ABOVE' : 'BELOW'}</span>
+          </div>
         </div>
+      </div>
+
+      {/* Altitude bar */}
+      <div className="px-4 pb-4 pt-1">
+        <AltitudeArc altitudeDeg={altitude} />
       </div>
     </div>
   )

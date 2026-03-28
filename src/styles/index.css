@@ -1,42 +1,110 @@
 @import "tailwindcss";
 
+/* ─── Teenage Engineering–inspired design system ─────────────────────────── */
+
 @theme {
-  --color-sun-orange: #f97316;
-  --color-sun-gold: #fbbf24;
-  --color-night-dark: #0f172a;
-  --color-horizon-blue: #0ea5e9;
+  /* Typography — IBM Plex Mono everywhere */
+  --font-sans: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Palette — near-pure black with single warm accent */
+  --color-te-bg:         #090909;
+  --color-te-s1:         #111111;
+  --color-te-s2:         #181818;
+  --color-te-border:     #222222;
+  --color-te-border-2:   #303030;
+  --color-te-text:       #e8e8e8;
+  --color-te-muted:      #686868;
+  --color-te-dim:        #363636;
+  --color-te-orange:     #ff6600;
+  --color-te-amber:      #ffaa00;
+  --color-te-blue:       #0099ff;
+  --color-te-green:      #00cc66;
+  --color-te-red:        #ff3333;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0f172a;
-  color: white;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Prevent iOS bounce/overscroll on the app shell */
-html, body {
   overscroll-behavior: none;
+  background-color: #090909;
+  color: #e8e8e8;
+  font-family: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 1; /* tabular numbers everywhere */
 }
 
-/* Leaflet z-index fix */
+/* ─── TE utility classes ──────────────────────────────────────────────────── */
+
+/* Instrument label: tiny all-caps, spaced */
+.te-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #686868;
+  font-family: inherit;
+}
+
+/* Primary readout value */
+.te-value {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #e8e8e8;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Large hero readout */
+.te-value-xl {
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #e8e8e8;
+  font-feature-settings: 'tnum' 1;
+  line-height: 1;
+}
+
+/* Accent readout (sun direction etc.) */
+.te-value-accent {
+  color: #ff6600;
+}
+
+/* Hairline rule */
+.te-rule {
+  border: none;
+  border-top: 1px solid #222222;
+  margin: 0;
+}
+
+/* Instrument cell border */
+.te-cell {
+  border: 1px solid #222222;
+  background: #111111;
+}
+
+/* ─── Leaflet ─────────────────────────────────────────────────────────────── */
 .leaflet-container {
-  background: #0f172a;
+  background: #090909;
   z-index: 0;
+  font-family: inherit;
 }
 
-/* User location pulsing ring */
+.leaflet-control-zoom a {
+  background: #111111 !important;
+  color: #e8e8e8 !important;
+  border-color: #222222 !important;
+  font-family: 'IBM Plex Mono', monospace !important;
+}
+
+/* ─── User location pulse ─────────────────────────────────────────────────── */
 @keyframes sc-location-pulse {
-  0%   { transform: scale(1);   opacity: 0.7; }
-  100% { transform: scale(2.4); opacity: 0;   }
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0;   }
 }
 .sc-pulse {
   transform-origin: 20px 20px;
-  animation: sc-location-pulse 2s ease-out infinite;
+  animation: sc-location-pulse 2.2s ease-out infinite;
 }

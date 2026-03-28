@@ -3,7 +3,6 @@ import { formatTime, formatCountdown, formatDayProgress } from '@/utils/formatUt
 
 export function SunriseSunsetCard() {
   const sunTimes = useAppStore((s) => s.sunTimes)
-
   if (!sunTimes) return null
 
   const { sunrise, sunset, solarNoon } = sunTimes
@@ -13,44 +12,61 @@ export function SunriseSunsetCard() {
   const isBeforeSunrise = sunrise && now < sunrise
 
   return (
-    <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50 space-y-4">
-      <p className="text-slate-400 text-xs uppercase tracking-wider">Day Timeline</p>
+    <div className="border-b border-te-border">
+      <div className="px-4 pt-4 pb-2">
+        <div className="te-label mb-3">DAY ARC</div>
 
-      {/* Sunrise / Sunset */}
-      <div className="flex justify-between items-center">
-        <div className="text-center">
-          <div className="text-xs text-slate-400 mb-0.5">Sunrise</div>
-          <div className="text-lg font-semibold text-orange-300">{formatTime(sunrise)}</div>
+        {/* Time row */}
+        <div className="grid grid-cols-3 mb-3">
+          <div>
+            <div className="te-label mb-1">SUNRISE</div>
+            <div className="text-sm font-medium text-te-text" style={{ fontFeatureSettings: '"tnum" 1' }}>
+              {formatTime(sunrise)}
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="te-label mb-1">SOLAR NOON</div>
+            <div className="text-sm font-medium text-te-text" style={{ fontFeatureSettings: '"tnum" 1' }}>
+              {formatTime(solarNoon)}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="te-label mb-1">SUNSET</div>
+            <div className="text-sm font-medium text-te-text" style={{ fontFeatureSettings: '"tnum" 1' }}>
+              {formatTime(sunset)}
+            </div>
+          </div>
         </div>
-        <div className="text-center">
-          <div className="text-xs text-slate-400 mb-0.5">Solar Noon</div>
-          <div className="text-lg font-semibold text-yellow-300">{formatTime(solarNoon)}</div>
-        </div>
-        <div className="text-center">
-          <div className="text-xs text-slate-400 mb-0.5">Sunset</div>
-          <div className="text-lg font-semibold text-orange-300">{formatTime(sunset)}</div>
-        </div>
-      </div>
 
-      {/* Progress bar */}
-      <div className="relative h-2 bg-slate-700 rounded-full overflow-hidden">
-        <div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full transition-all duration-1000"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+        {/* Progress track */}
+        <div className="relative h-[2px] bg-te-border mb-3">
+          <div
+            className="absolute inset-y-0 left-0 bg-te-orange transition-all duration-1000"
+            style={{ width: `${progress}%` }}
+          />
+          {/* Noon marker */}
+          <div className="absolute top-1/2 -translate-y-1/2 w-[1px] h-2 bg-te-border-2" style={{ left: '50%' }} />
+          {/* Now cursor */}
+          {progress > 0 && progress < 100 && (
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-[2px] h-4 bg-te-orange transition-all duration-1000"
+              style={{ left: `${progress}%` }}
+            />
+          )}
+        </div>
 
-      {/* Countdown */}
-      <div className="text-center text-sm">
-        {isBeforeSunrise && (
-          <span className="text-orange-300">Sunrise in <strong>{formatCountdown(sunrise)}</strong></span>
-        )}
-        {!isBeforeSunrise && !isPastSunset && (
-          <span className="text-slate-300">Sunset in <strong className="text-orange-300">{formatCountdown(sunset)}</strong></span>
-        )}
-        {isPastSunset && (
-          <span className="text-slate-400">Sun has set today</span>
-        )}
+        {/* Countdown */}
+        <div className="te-label">
+          {isBeforeSunrise && (
+            <span>SUNRISE IN <span className="text-te-orange">{formatCountdown(sunrise)}</span></span>
+          )}
+          {!isBeforeSunrise && !isPastSunset && (
+            <span>SETS IN <span className="text-te-orange">{formatCountdown(sunset)}</span></span>
+          )}
+          {isPastSunset && (
+            <span className="text-te-dim">SUN HAS SET</span>
+          )}
+        </div>
       </div>
     </div>
   )

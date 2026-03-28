@@ -9,7 +9,13 @@ export function formatBearing(azimuthDeg: number): string {
   const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
   const index = Math.round(azimuthDeg / 22.5) % 16
-  return `${dirs[index]} ${Math.round(azimuthDeg)}°`
+  return `${dirs[index]} · ${Math.round(azimuthDeg)}°`
+}
+
+export function formatCardinal(azimuthDeg: number): string {
+  const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
+  return dirs[Math.round(azimuthDeg / 22.5) % 16]
 }
 
 export function formatAltitude(altitudeDeg: number): string {

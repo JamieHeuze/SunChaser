@@ -1,57 +1,53 @@
+/** Horizontal altitude meter — instrument-style level indicator */
 interface Props {
   altitudeDeg: number
 }
 
 export function AltitudeArc({ altitudeDeg }: Props) {
-  const clampedAlt = Math.max(-10, Math.min(90, altitudeDeg))
-  // Map -10..90 to 180..0 degrees of arc (left horizon = 180°, zenith = 90°, right horizon = 0°)
-  const arcAngle = 180 - ((clampedAlt + 10) / 100) * 180
-  const r = 44
-  const cx = 56
-  const cy = 56
-
-  // Sun position on the arc
-  const rad = (arcAngle * Math.PI) / 180
-  const sx = cx + r * Math.cos(rad)
-  const sy = cy - r * Math.sin(rad) // SVG y-axis is flipped
-
+  const clamped = Math.max(-10, Math.min(90, altitudeDeg))
+  // Map -10..90 → 0..100%
+  const pct = ((clamped + 10) / 100) * 100
   const isAbove = altitudeDeg > 0
 
+  const ticks = [-10, 0, 15, 30, 45, 60, 75, 90]
+
   return (
-    <svg viewBox="0 0 112 64" className="w-full max-w-[200px]">
-      {/* Arc path */}
-      <path
-        d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
-        fill="none"
-        stroke="#1e293b"
-        strokeWidth={4}
-        strokeLinecap="round"
-      />
-      {/* Progress arc */}
-      {isAbove && (
-        <path
-          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${sx} ${sy}`}
-          fill="none"
-          stroke="#f97316"
-          strokeWidth={4}
-          strokeLinecap="round"
-          opacity={0.6}
+    <div className="w-full">
+      {/* Track */}
+      <div className="relative h-[2px] bg-te-border rounded-none mb-2">
+        {/* Filled portion */}
+        <div
+          className="absolute inset-y-0 left-0 transition-all duration-500"
+          style={{
+            width: `${pct}%`,
+            background: isAbove ? '#ff6600' : '#363636',
+          }}
         />
-      )}
-      {/* Horizon line */}
-      <line x1={cx - r - 4} y1={cy} x2={cx + r + 4} y2={cy} stroke="#334155" strokeWidth={1} />
-      {/* Sun dot */}
-      <circle
-        cx={sx}
-        cy={sy}
-        r={5}
-        fill={isAbove ? '#fbbf24' : '#64748b'}
-        className={isAbove ? 'animate-pulse' : ''}
-      />
-      {/* Altitude label */}
-      <text x={cx} y={cy + 14} textAnchor="middle" className="text-xs" fill="#94a3b8" fontSize="8">
-        {Math.round(altitudeDeg)}° alt
-      </text>
-    </svg>
+        {/* Cursor */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-[2px] h-3 transition-all duration-500"
+          style={{
+            left: `${pct}%`,
+            background: isAbove ? '#ff6600' : '#686868',
+          }}
+        />
+      </div>
+
+      {/* Tick labels */}
+      <div className="relative h-3">
+        {ticks.map((t) => {
+          const pos = ((t + 10) / 100) * 100
+          return (
+            <span
+              key={t}
+              className="absolute te-label"
+              style={{ left: `${pos}%`, transform: 'translateX(-50%)', color: t === 0 ? '#686868' : '#363636' }}
+            >
+              {t === 0 ? '0' : t === 90 ? '90' : ''}
+            </span>
+          )
+        })}
+      </div>
+    </div>
   )
 }

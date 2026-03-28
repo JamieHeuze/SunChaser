@@ -6,20 +6,18 @@ export function Header() {
   const label = useAppStore((s) => s.location.label)
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-slate-900/80 backdrop-blur border-b border-slate-800/60">
-      <div className="flex items-center gap-2">
-        <span className="text-xl">☀️</span>
-        <span className="font-bold text-white tracking-tight">SunChaser</span>
-      </div>
+    <header className="flex items-center justify-between px-4 h-10 border-b border-te-border bg-te-bg shrink-0">
+      <span className="te-label text-te-text tracking-[0.22em]">SUNCHASER</span>
       <button
         onClick={() => navigate('/onboarding')}
-        className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-orange-400 transition-colors"
+        className="flex items-center gap-2 te-label hover:text-te-orange transition-colors"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 shrink-0">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-          <circle cx="12" cy="10" r="3" />
+        <svg viewBox="0 0 10 10" fill="currentColor" className="w-2 h-2 shrink-0">
+          <polygon points="5,1 9,9 1,9" />
         </svg>
-        <span className="truncate max-w-[140px]">{label || 'Set location'}</span>
+        <span className="truncate max-w-[160px] normal-case text-te-muted hover:text-te-orange transition-colors" style={{ fontSize: '10px', letterSpacing: '0.06em' }}>
+          {label || 'SET LOCATION'}
+        </span>
       </button>
     </header>
   )
