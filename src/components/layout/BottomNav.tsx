@@ -13,22 +13,26 @@ export function BottomNav() {
   const { pathname } = useLocation()
 
   return (
-    <nav className="flex border-t border-te-border bg-te-bg shrink-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav
+      className="flex border-t border-te-border bg-te-bg shrink-0"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       {tabs.map((tab) => {
         const active = pathname === tab.path
         return (
           <button
             key={tab.path}
             onClick={() => navigate(tab.path)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 h-14 transition-colors relative ${
+            className={`flex-1 flex flex-col items-center justify-center gap-[5px] transition-colors relative ${
               active ? 'text-te-orange' : 'text-te-dim hover:text-te-muted'
             }`}
+            style={{ height: '49px' }}
           >
             {active && (
-              <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2px] bg-te-orange" />
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-te-orange" />
             )}
-            <span className="text-[14px] leading-none">{tab.icon}</span>
-            <span className="te-label" style={{ fontSize: '9px', color: active ? '#ff6600' : undefined }}>
+            <span style={{ fontSize: '20px', lineHeight: 1 }}>{tab.icon}</span>
+            <span className="te-label" style={{ fontSize: '10px', color: active ? '#ff6600' : undefined }}>
               {tab.label}
             </span>
           </button>

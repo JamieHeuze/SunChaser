@@ -40,7 +40,7 @@ html, body {
 
 /* Instrument label: tiny all-caps, spaced */
 .te-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -50,7 +50,7 @@ html, body {
 
 /* Primary readout value */
 .te-value {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: #e8e8e8;
@@ -59,7 +59,7 @@ html, body {
 
 /* Large hero readout */
 .te-value-xl {
-  font-size: 44px;
+  font-size: 50px;
   font-weight: 500;
   letter-spacing: -0.02em;
   color: #e8e8e8;
