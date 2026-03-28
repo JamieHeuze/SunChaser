@@ -38,8 +38,8 @@ export function Header() {
   }
 
   return (
-    <header className="relative shrink-0">
-      <div className="flex items-center justify-between px-4 h-11 border-b border-te-border bg-te-bg">
+    <header className="relative shrink-0 bg-te-bg" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="flex items-center justify-between px-4 h-11 border-b border-te-border">
         <span className="te-label text-te-text tracking-[0.22em]">SUNCHASER</span>
 
         <div className="flex items-center gap-3">

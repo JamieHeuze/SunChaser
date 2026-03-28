@@ -13,7 +13,7 @@ export function BottomNav() {
   const { pathname } = useLocation()
 
   return (
-    <nav className="flex border-t border-te-border bg-te-bg shrink-0">
+    <nav className="flex border-t border-te-border bg-te-bg shrink-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {tabs.map((tab) => {
         const active = pathname === tab.path
         return (

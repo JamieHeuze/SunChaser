@@ -9,7 +9,13 @@ export function Layout() {
   return (
     <div className="flex flex-col h-dvh bg-te-bg text-te-text">
       <Header />
-      <main className="flex-1 overflow-y-auto">
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+        }}
+      >
         <Outlet />
       </main>
       <BottomNav />
