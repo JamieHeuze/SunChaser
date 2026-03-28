@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/SunChaser/sw.js', { scope: '/SunChaser/' })})}
