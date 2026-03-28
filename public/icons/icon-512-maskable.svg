@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Full bleed background — maskable icons should fill the entire canvas -->
+  <rect width="512" height="512" fill="#090909"/>
+  <!-- Content scaled to stay within safe zone (center 409px, offset 51px each side) -->
+  <!-- Sun body centered -->
+  <circle cx="256" cy="256" r="88" fill="#ff6600"/>
+  <!-- Rays — kept within safe zone (max reach ~210px from center = 256±210 = 46..466) -->
+  <line x1="256" y1="148" x2="256" y2="108" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="332" y1="180" x2="360" y2="152" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="364" y1="256" x2="404" y2="256" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="332" y1="332" x2="360" y2="360" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="256" y1="364" x2="256" y2="404" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="180" y1="332" x2="152" y2="360" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="148" y1="256" x2="108" y2="256" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+  <line x1="180" y1="180" x2="152" y2="152" stroke="#ff6600" stroke-width="20" stroke-linecap="round" opacity="0.75"/>
+</svg>

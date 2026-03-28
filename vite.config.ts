@@ -16,7 +16,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/*.svg', 'favicon.svg'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'favicon.svg', 'icons/icon-512-maskable.png'],
       manifest: {
         name: 'SunChaser',
         short_name: 'SunChaser',
@@ -39,7 +39,7 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'icons/icon-512.png',
+            src: 'icons/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
