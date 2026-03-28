@@ -21,12 +21,12 @@ export default defineConfig({
         name: 'SunChaser',
         short_name: 'SunChaser',
         description: 'Track the sun in real-time. Plan trips around perfect daylight.',
-        theme_color: '#f97316',
-        background_color: '#0f172a',
+        theme_color: '#ff6600',
+        background_color: '#090909',
         display: 'standalone',
         orientation: 'any',
-        scope: '/',
-        start_url: '/',
+        scope: '/SunChaser/',
+        start_url: '/SunChaser/',
         icons: [
           {
             src: 'icons/icon-192.png',
