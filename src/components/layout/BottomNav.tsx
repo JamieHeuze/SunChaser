@@ -1,10 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const tabs = [
-  { path: '/dashboard', label: 'SUN',     icon: '◉' },
-  { path: '/compass',   label: 'COMPASS', icon: '◎' },
-  { path: '/map',       label: 'MAP',     icon: '▣' },
-  { path: '/planner',   label: 'PLAN',    icon: '▦' },
+  { path: '/dashboard', label: 'SUN',  icon: '◉' },
+  { path: '/compass',   label: 'COMP', icon: '◎' },
+  { path: '/map',       label: 'MAP',  icon: '▣' },
+  { path: '/planner',   label: 'PLAN', icon: '▦' },
+  { path: '/calendar',  label: 'CAL',  icon: '▤' },
 ]
 
 export function BottomNav() {
@@ -26,8 +27,8 @@ export function BottomNav() {
             {active && (
               <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2px] bg-te-orange" />
             )}
-            <span className="text-[13px] leading-none">{tab.icon}</span>
-            <span className="te-label" style={{ color: active ? '#ff6600' : undefined }}>
+            <span className="text-[14px] leading-none">{tab.icon}</span>
+            <span className="te-label" style={{ fontSize: '9px', color: active ? '#ff6600' : undefined }}>
               {tab.label}
             </span>
           </button>

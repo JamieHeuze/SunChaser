@@ -6,6 +6,7 @@ import type {
   SunTimes,
   DeviceOrientationState,
   ActiveTab,
+  LocationBookmark,
 } from './types'
 
 interface AppStore {
@@ -16,6 +17,7 @@ interface AppStore {
   activeTab: ActiveTab
   plannerDate: number // stored as timestamp for persistence
   isOnline: boolean
+  bookmarks: LocationBookmark[]
 
   setLocation: (loc: LocationState) => void
   setSunPosition: (pos: SunPosition) => void
@@ -24,6 +26,8 @@ interface AppStore {
   setActiveTab: (tab: ActiveTab) => void
   setPlannerDate: (date: Date) => void
   setOnline: (online: boolean) => void
+  addBookmark: (bookmark: LocationBookmark) => void
+  removeBookmark: (id: string) => void
 }
 
 export const useAppStore = create<AppStore>()(
@@ -45,6 +49,7 @@ export const useAppStore = create<AppStore>()(
         return d.getTime()
       })(),
       isOnline: navigator.onLine,
+      bookmarks: [],
 
       setLocation: (loc) => set({ location: loc }),
       setSunPosition: (pos) => set({ sunPosition: pos }),
@@ -54,12 +59,17 @@ export const useAppStore = create<AppStore>()(
       setActiveTab: (tab) => set({ activeTab: tab }),
       setPlannerDate: (date) => set({ plannerDate: date.getTime() }),
       setOnline: (online) => set({ isOnline: online }),
+      addBookmark: (bookmark) =>
+        set((s) => ({ bookmarks: [...s.bookmarks.filter((b) => b.id !== bookmark.id), bookmark] })),
+      removeBookmark: (id) =>
+        set((s) => ({ bookmarks: s.bookmarks.filter((b) => b.id !== id) })),
     }),
     {
       name: 'sunchaser-store',
       partialize: (state) => ({
         location: state.location,
         plannerDate: state.plannerDate,
+        bookmarks: state.bookmarks,
       }),
     }
   )

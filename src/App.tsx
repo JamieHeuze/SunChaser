@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { CompassPage } from '@/pages/CompassPage'
 import { MapPage } from '@/pages/MapPage'
 import { TripPlannerPage } from '@/pages/TripPlannerPage'
+import { CalendarPage } from '@/pages/CalendarPage'
 
 function RootRedirect() {
   const coords = useAppStore((s) => s.location.coords)
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/compass" element={<CompassPage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/planner" element={<TripPlannerPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
