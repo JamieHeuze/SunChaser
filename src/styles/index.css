@@ -29,11 +29,18 @@ html, body {
   margin: 0;
   padding: 0;
   overscroll-behavior: none;
+  /* Fill status-bar and home-indicator gutters with app background */
   background-color: #090909;
   color: #e8e8e8;
   font-family: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'tnum' 1; /* tabular numbers everywhere */
+  /* Prevent any rubber-band gap showing through on iOS */
+  height: 100%;
+}
+
+#root {
+  height: 100%;
 }
 
 /* ─── TE utility classes ──────────────────────────────────────────────────── */
