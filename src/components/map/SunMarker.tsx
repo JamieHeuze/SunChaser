@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import type { Coordinates } from '@/store/types'
+import { azimuthToLatLng } from '@/utils/sunCalcUtils'
 
 interface Props {
   coords: Coordinates
@@ -11,37 +12,63 @@ interface Props {
 
 export function SunMarker({ coords, azimuthDeg, altitudeDeg }: Props) {
   const map = useMap()
+  const markerRef = useRef<L.Marker | null>(null)
+  const lineRef   = useRef<L.Polyline | null>(null)
 
+  // Create marker + line once on mount
   useEffect(() => {
-    const isAbove = altitudeDeg > 0
-    const arrowSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" r="10" fill="${isAbove ? '#fbbf24' : '#475569'}" opacity="0.9"/>
-        <circle cx="24" cy="24" r="10" fill="none" stroke="${isAbove ? '#f97316' : '#334155'}" stroke-width="2"/>
-        <line x1="24" y1="14" x2="24" y2="6" stroke="${isAbove ? '#f97316' : '#475569'}" stroke-width="2.5" stroke-linecap="round"/>
-        <polygon points="24,2 21,8 27,8" fill="${isAbove ? '#f97316' : '#475569'}"/>
-        ${isAbove ? `
-        <circle cx="24" cy="24" r="14" fill="${'#f97316'}" opacity="0.15"/>
-        ` : ''}
-      </svg>
-    `
-    const icon = L.divIcon({
-      html: `<div style="transform: rotate(${azimuthDeg}deg); transform-origin: center center;">${arrowSvg}</div>`,
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
-      className: '',
-    })
+    const isAbove = altitudeDeg > -0.833
+    const zoom = map.getZoom()
+    const radiusDeg = Math.max(0.05, Math.min(0.4, 0.3 / (zoom / 10)))
+    const [sunLat, sunLng] = azimuthToLatLng(coords.lat, coords.lng, azimuthDeg, radiusDeg)
 
-    const marker = L.marker([coords.lat, coords.lng], { icon }).addTo(map)
+    const icon = buildIcon(isAbove)
+    const marker = L.marker([sunLat, sunLng], { icon, interactive: true }).addTo(map)
     marker.bindTooltip(
-      `${isAbove ? '☀️' : '🌙'} ${Math.round(azimuthDeg)}° · ${Math.round(altitudeDeg)}° alt`,
-      { permanent: false, direction: 'top' }
+      `${isAbove ? 'SUN' : 'NIGHT'} · ${Math.round(azimuthDeg)}° · ${Math.round(altitudeDeg)}° alt`,
+      { permanent: false, direction: 'top', className: 'te-tooltip' }
     )
 
-    return () => {
-      map.removeLayer(marker)
-    }
-  }, [map, coords, azimuthDeg, altitudeDeg])
+    const line = L.polyline(
+      [[coords.lat, coords.lng], [sunLat, sunLng]],
+      { color: isAbove ? '#ff6600' : '#444444', weight: 1.5, opacity: 0.5, dashArray: '5 5' }
+    ).addTo(map)
+
+    markerRef.current = marker
+    lineRef.current   = line
+
+    return () => { map.removeLayer(marker); map.removeLayer(line) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, coords.lat, coords.lng])
+
+  // Reposition without recreating when azimuth or altitude changes
+  useEffect(() => {
+    if (!markerRef.current || !lineRef.current) return
+    const isAbove = altitudeDeg > -0.833
+    const zoom = map.getZoom()
+    const radiusDeg = Math.max(0.05, Math.min(0.4, 0.3 / (zoom / 10)))
+    const [sunLat, sunLng] = azimuthToLatLng(coords.lat, coords.lng, azimuthDeg, radiusDeg)
+
+    markerRef.current.setLatLng([sunLat, sunLng])
+    markerRef.current.setIcon(buildIcon(isAbove))
+    markerRef.current.setTooltipContent(
+      `${isAbove ? 'SUN' : 'NIGHT'} · ${Math.round(azimuthDeg)}° · ${Math.round(altitudeDeg)}° alt`
+    )
+    lineRef.current.setLatLngs([[coords.lat, coords.lng], [sunLat, sunLng]])
+    lineRef.current.setStyle({ color: isAbove ? '#ff6600' : '#444444' })
+  }, [map, azimuthDeg, altitudeDeg, coords])
 
   return null
+}
+
+function buildIcon(isAbove: boolean): L.DivIcon {
+  const color = isAbove ? '#ff6600' : '#444'
+  const glow  = isAbove ? `<circle cx="16" cy="16" r="14" fill="${color}" opacity="0.15"/>` : ''
+  const html = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      ${glow}
+      <circle cx="16" cy="16" r="7" fill="${color}" opacity="${isAbove ? 0.9 : 0.5}"/>
+      <circle cx="16" cy="16" r="7" fill="none" stroke="${isAbove ? '#ffaa00' : '#333'}" stroke-width="1.5"/>
+    </svg>`
+  return L.divIcon({ html, iconSize: [32, 32], iconAnchor: [16, 16], className: '' })
 }
