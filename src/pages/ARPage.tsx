@@ -16,7 +16,6 @@ function normaliseAngle(a: number): number {
   return ((a % 360) + 360) % 360
 }
 
-// Delta azimuth, wrapped to -180..180
 function deltaAz(sun: number, device: number): number {
   let d = normaliseAngle(sun - device)
   if (d > 180) d -= 360
@@ -37,7 +36,7 @@ export function ARPage() {
   const [camState, setCamState] = useState<'idle' | 'requesting' | 'granted' | 'denied'>('idle')
   const [orientState, setOrientState] = useState<'idle' | 'granted' | 'denied'>('idle')
 
-  // ── Camera setup ────────────────────────────────────────────────────────────
+  // ── Camera setup ─────────────────────────────────────────────────────────────
   const startCamera = useCallback(async () => {
     setCamState('requesting')
     try {
@@ -46,17 +45,12 @@ export function ARPage() {
         audio: false,
       })
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
-      }
       setCamState('granted')
     } catch {
       setCamState('denied')
     }
   }, [])
 
-  // Start camera on mount
   useEffect(() => {
     startCamera()
     return () => {
@@ -65,7 +59,15 @@ export function ARPage() {
     }
   }, [startCamera])
 
-  // ── Device orientation ───────────────────────────────────────────────────────
+  // Attach stream to video element once both are ready
+  useEffect(() => {
+    if (camState === 'granted' && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current
+      videoRef.current.play().catch(() => {/* autoplay policy — muted inline should always work */})
+    }
+  }, [camState])
+
+  // ── Device orientation ────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: DeviceOrientationEvent) => {
       const ios = e as IOSDeviceOrientationEvent
@@ -75,7 +77,6 @@ export function ARPage() {
           : e.alpha !== null
           ? (360 - (e.alpha ?? 0)) % 360
           : orientRef.current.heading
-      // beta: 90 = phone upright pointing at horizon. pitch = 90 - beta
       const pitch = e.beta !== null ? 90 - (e.beta ?? 90) : orientRef.current.pitch
       orientRef.current = { heading, pitch }
       setOrientState('granted')
@@ -88,13 +89,12 @@ export function ARPage() {
     }
   }, [])
 
-  // iOS orientation permission request
   const handleOrientPermission = async () => {
     await requestOrientationPermission(setDeviceOrientation)
     setOrientState('granted')
   }
 
-  // ── Canvas render loop ───────────────────────────────────────────────────────
+  // ── Canvas render loop ────────────────────────────────────────────────────────
   useEffect(() => {
     if (camState !== 'granted') return
 
@@ -119,55 +119,49 @@ export function ARPage() {
       const now = new Date()
       const sun = getSunPosition(now, coords.lat, coords.lng)
       const quality = getLightQuality(sun.altitudeDeg)
-
       const { heading, pitch } = orientRef.current
 
-      // Sun screen position
       const dAz = deltaAz(sun.azimuthDeg, heading)
       const dAlt = sun.altitudeDeg - pitch
       const sx = W / 2 + (dAz / FOV_H) * W
       const sy = H / 2 - (dAlt / FOV_V) * H
-
       const onScreen = sx > -60 && sx < W + 60 && sy > -60 && sy < H + 60
       const sunColor = sun.isAboveHorizon ? quality.color : '#363636'
 
-      // ── Crosshair ────────────────────────────────────────────────────────────
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)'
+      // Crosshair
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'
       ctx.lineWidth = 1
       ctx.setLineDash([4, 8])
       ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke()
       ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke()
       ctx.setLineDash([])
 
-      // ── Horizon line ─────────────────────────────────────────────────────────
-      const horizonY = H / 2 - (-pitch / FOV_V) * H  // where 0° altitude lands
-      ctx.strokeStyle = 'rgba(255,102,0,0.35)'
+      // Horizon line
+      const horizonY = H / 2 + (pitch / FOV_V) * H
+      ctx.strokeStyle = 'rgba(255,102,0,0.4)'
       ctx.lineWidth = 1
       ctx.beginPath(); ctx.moveTo(0, horizonY); ctx.lineTo(W, horizonY); ctx.stroke()
-      ctx.fillStyle = 'rgba(255,102,0,0.55)'
-      ctx.font = '500 11px "IBM Plex Mono", monospace'
-      ctx.fillText('HORIZON', 10, horizonY - 5)
+      ctx.font = '500 10px "IBM Plex Mono", monospace'
+      ctx.fillStyle = 'rgba(255,102,0,0.7)'
+      ctx.fillText('HORIZON', 10, horizonY - 6)
 
-      // ── Sun indicator ────────────────────────────────────────────────────────
+      // Sun indicator
       if (onScreen) {
-        // Outer glow
-        const grd = ctx.createRadialGradient(sx, sy, 4, sx, sy, 36)
-        grd.addColorStop(0, sunColor + 'aa')
+        const grd = ctx.createRadialGradient(sx, sy, 4, sx, sy, 40)
+        grd.addColorStop(0, sunColor + 'bb')
         grd.addColorStop(1, sunColor + '00')
         ctx.fillStyle = grd
-        ctx.beginPath(); ctx.arc(sx, sy, 36, 0, Math.PI * 2); ctx.fill()
+        ctx.beginPath(); ctx.arc(sx, sy, 40, 0, Math.PI * 2); ctx.fill()
 
-        // Sun body
         ctx.fillStyle = sunColor
-        ctx.beginPath(); ctx.arc(sx, sy, 12, 0, Math.PI * 2); ctx.fill()
+        ctx.beginPath(); ctx.arc(sx, sy, 13, 0, Math.PI * 2); ctx.fill()
 
-        // Centre dot
         ctx.fillStyle = '#090909'
         ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fill()
       } else {
-        // Off-screen arrow pointing toward sun
+        // Off-screen directional arrow
         const angle = Math.atan2(sy - H / 2, sx - W / 2)
-        const margin = 48
+        const margin = 52
         const ax = Math.max(margin, Math.min(W - margin, W / 2 + Math.cos(angle) * (Math.min(W, H) / 2 - margin)))
         const ay = Math.max(margin, Math.min(H - margin, H / 2 + Math.sin(angle) * (Math.min(W, H) / 2 - margin)))
         ctx.save()
@@ -180,24 +174,26 @@ export function ARPage() {
         ctx.restore()
       }
 
-      // ── HUD overlay ──────────────────────────────────────────────────────────
-      ctx.fillStyle = 'rgba(9,9,9,0.65)'
-      ctx.roundRect?.(12, 12, 220, 72, 4) ?? ctx.rect(12, 12, 220, 72)
+      // HUD panel
+      ctx.fillStyle = 'rgba(9,9,9,0.7)'
+      const hudW = 200, hudH = 78
+      ctx.beginPath()
+      if (ctx.roundRect) ctx.roundRect(12, 12, hudW, hudH, 4)
+      else ctx.rect(12, 12, hudW, hudH)
       ctx.fill()
 
       ctx.font = '500 10px "IBM Plex Mono", monospace'
-      ctx.letterSpacing = '0.12em'
       ctx.fillStyle = '#686868'
-      ctx.fillText('AZ', 22, 31)
-      ctx.fillText('ALT', 22, 51)
-      ctx.fillText('LIGHT', 22, 71)
+      ctx.fillText('AZ', 22, 33)
+      ctx.fillText('ALT', 22, 53)
+      ctx.fillText('LIGHT', 22, 73)
 
-      ctx.font = '500 14px "IBM Plex Mono", monospace'
+      ctx.font = '500 13px "IBM Plex Mono", monospace'
       ctx.fillStyle = '#e8e8e8'
-      ctx.fillText(`${sun.azimuthDeg.toFixed(1)}°`, 62, 31)
-      ctx.fillText(`${sun.altitudeDeg.toFixed(1)}°`, 62, 51)
+      ctx.fillText(`${sun.azimuthDeg.toFixed(1)}°`, 65, 33)
+      ctx.fillText(`${sun.altitudeDeg.toFixed(1)}°`, 65, 53)
       ctx.fillStyle = quality.color
-      ctx.fillText(quality.name, 62, 71)
+      ctx.fillText(quality.name, 65, 73)
 
       rafRef.current = requestAnimationFrame(draw)
     }
@@ -206,27 +202,10 @@ export function ARPage() {
     return () => cancelAnimationFrame(rafRef.current)
   }, [camState, coords])
 
-  // ── Render ───────────────────────────────────────────────────────────────────
-  if (camState === 'idle' || camState === 'requesting') {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 bg-te-bg">
-        <div className="te-label text-te-muted">STARTING CAMERA…</div>
-      </div>
-    )
-  }
-
-  if (camState === 'denied') {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 bg-te-bg px-8 text-center">
-        <div className="te-value" style={{ fontSize: '18px' }}>CAMERA ACCESS REQUIRED</div>
-        <div className="te-label text-te-muted">Allow camera access in Settings to use AR Sun Finder</div>
-      </div>
-    )
-  }
-
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
-      {/* Live camera feed */}
+      {/* Camera feed — always in DOM so ref is available when stream arrives */}
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
@@ -235,20 +214,34 @@ export function ARPage() {
         autoPlay
       />
 
-      {/* AR overlay canvas */}
+      {/* AR overlay canvas — only draws when camState === 'granted' */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
         style={{ touchAction: 'none' }}
       />
 
-      {/* iOS orientation permission prompt */}
-      {orientPermState === 'prompt' && orientState !== 'granted' && (
+      {/* Permission / loading states as overlays */}
+      {(camState === 'idle' || camState === 'requesting') && (
+        <div className="absolute inset-0 flex items-center justify-center bg-te-bg">
+          <span className="te-label text-te-dim">STARTING CAMERA…</span>
+        </div>
+      )}
+
+      {camState === 'denied' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-te-bg px-8 text-center">
+          <div className="te-value" style={{ fontSize: '18px' }}>CAMERA ACCESS REQUIRED</div>
+          <div className="te-label text-te-muted">Allow camera access in Settings to use AR Sun Finder</div>
+        </div>
+      )}
+
+      {/* iOS orientation permission */}
+      {camState === 'granted' && orientPermState === 'prompt' && orientState !== 'granted' && (
         <div className="absolute bottom-6 left-4 right-4 flex justify-center">
           <button
             onClick={handleOrientPermission}
             className="te-label px-5 py-3 border border-te-orange text-te-orange"
-            style={{ background: 'rgba(9,9,9,0.8)' }}
+            style={{ background: 'rgba(9,9,9,0.85)' }}
           >
             [ ENABLE COMPASS ]
           </button>
@@ -256,9 +249,9 @@ export function ARPage() {
       )}
 
       {/* No location warning */}
-      {!coords && (
-        <div className="absolute top-20 left-0 right-0 flex justify-center">
-          <div className="te-label px-4 py-2" style={{ background: 'rgba(9,9,9,0.75)' }}>
+      {camState === 'granted' && !coords && (
+        <div className="absolute top-4 left-0 right-0 flex justify-center">
+          <div className="te-label px-4 py-2" style={{ background: 'rgba(9,9,9,0.8)' }}>
             SET LOCATION TO TRACK SUN
           </div>
         </div>
