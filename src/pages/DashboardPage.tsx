@@ -6,6 +6,7 @@ import { GoldenHourCard } from '@/components/dashboard/GoldenHourCard'
 import { LightQualityCard } from '@/components/dashboard/LightQualityCard'
 import { MoonPhaseCard } from '@/components/dashboard/MoonPhaseCard'
 import { ShadowCalculatorCard } from '@/components/dashboard/ShadowCalculatorCard'
+import { WeatherCard } from '@/components/dashboard/WeatherCard'
 import { useAppStore } from '@/store/appStore'
 import {
   notificationsSupported,
@@ -64,6 +65,7 @@ export function DashboardPage() {
 
       <SunInfoCard />
       <LightQualityCard />
+      <WeatherCard />
       <SunriseSunsetCard />
       <GoldenHourCard />
       <MoonPhaseCard />

@@ -31,7 +31,7 @@ export interface DeviceOrientationState {
   permissionState: 'granted' | 'denied' | 'prompt' | 'unavailable'
 }
 
-export type ActiveTab = 'dashboard' | 'compass' | 'map' | 'planner' | 'calendar'
+export type ActiveTab = 'dashboard' | 'compass' | 'map' | 'planner' | 'calendar' | 'ar'
 
 export interface LocationBookmark {
   id: string

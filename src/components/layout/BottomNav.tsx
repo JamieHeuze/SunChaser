@@ -6,6 +6,7 @@ const tabs = [
   { path: '/map',       label: 'MAP',  icon: '▣' },
   { path: '/planner',   label: 'PLAN', icon: '▦' },
   { path: '/calendar',  label: 'CAL',  icon: '▤' },
+  { path: '/ar',        label: 'AR',   icon: '⊙' },
 ]
 
 export function BottomNav() {
