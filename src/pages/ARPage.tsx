@@ -249,7 +249,7 @@ export function ARPage() {
         typeof ios.webkitCompassHeading === 'number' && ios.webkitCompassHeading >= 0
           ? ios.webkitCompassHeading
           : e.alpha !== null ? (360 - (e.alpha ?? 0)) % 360 : orientRef.current.heading
-      const pitch = e.beta !== null ? 90 - (e.beta ?? 90) : orientRef.current.pitch
+      const pitch = e.beta !== null ? (e.beta ?? 90) - 90 : orientRef.current.pitch
       orientRef.current = { heading, pitch }
       setOrientState('granted')
     }
